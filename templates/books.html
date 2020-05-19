@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+{% block title %}
+<title>Books Store</title>
+{% endblock %}
+
+{% block nav %}
+{% if session['user'] %}
+<li class="nav-item active">
+  <a class="nav-link text-success">Welcome! {{ name }}</a>
+</li>
+<li class="nav-item">
+  <a class="nav-link text-primary" href="{{ url_for('logout') }}">Logout</a>
+</li>
+
+{% else %}
+<li class="nav-item active">
+  <a class="nav-link text-primary" href="{{ url_for('login') }}">Login</a>
+</li>
+<li class="nav-item">
+  <a class="nav-link text-primary" href="{{ url_for('signup') }}">Sign Up</a>
+</li>
+{% endif %}
+{% endblock %}
+
+{% block main %}
+    <main>
+      <section>
+        <div class="container">
+          <div class="main-div">
+
+            <ul>
+              <li>
+                {{ author }}
+                
+              </li>
+              <li>
+                {{ title }}
+              </li>
+              <li> 
+                {{ isbns }}
+              </li>
+              <li>
+                {{ year }}
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </main>
+
+{% endblock %}

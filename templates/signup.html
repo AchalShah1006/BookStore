@@ -1,0 +1,21 @@
+{% extends "layout.html "%}
+{% block title %}
+<title>Sign Up</title>
+{% endblock %}
+{% block main %}
+<div class="main">
+  <div class="form shadow p-3">
+      <div class="heading">
+          <span>Sign Up </span>  <span><i class="fas fa-user"></i></span>
+      </div>
+      <hr>
+      <form action="/signup" method="POST">
+          <input type="text" name="username" id="username" placeholder="UserName" required>
+          <input type="password" name="password" id="password" placeholder="Password" required >
+          <button type="submit" class="btn btn-outline-success">Sign Up</button>
+          <br>
+          <a href="{{ url_for('login') }}">Already Have an account!</a>
+      </form>
+  </div>
+</div>
+{% endblock %}

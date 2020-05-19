@@ -1,0 +1,78 @@
+{% extends "layout.html" %}
+{% block title %}
+<title>Books Store</title>
+{% endblock %}
+{% block nav %}
+{% if session["user"] %}
+<li class="nav-item active">
+  <a class="nav-link text-success">Welcome {{ name }} </a>
+</li>
+<li class="nav-item">
+  <a class="nav-link text-primary" href="{{ url_for('logout') }}">Logout</a>
+</li>
+
+{% else %}
+<li class="nav-item active">
+  <a class="nav-link text-primary" href="{{ url_for('login') }}">Login</a>
+</li>
+<li class="nav-item">
+  <a class="nav-link text-primary" href="{{ url_for('signup') }}">Sign Up</a>
+</li>
+{% endif %}
+{% endblock %}
+
+{% block search %}
+{% if session["user"] %}
+<form action="/search" method="POST" class="form-inline my-2 my-lg-0">
+  <input class="form-control mr-sm-2" id="getinput" name="getinput" type="search" placeholder="Search">
+  <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+</form>
+{% endif %}
+{% endblock %}
+
+{% block main %}
+<main class="main">
+  <section class="first-sec">
+    <div class="container">
+      <div class="main-div">
+        <div class="div-partitions">
+          <div class="card bg-dark">
+            <img src="https://images-na.ssl-images-amazon.com/images/I/815O5KyG6gL.jpg" class="card-img-top" alt="...">
+            <div class="card-body">
+              <form action="/book/1451648537" method="POST">
+                <div class="view-book">
+                  <button type="submit" class="viewbtn">View Book </button>       
+                </div>
+            </form>
+            </div>
+          </div>
+        </div>
+        <div class="div-partitions">
+          <div class="card bg-dark">
+            <img src="https://www.lwcurrey.com/pictures/161575.jpg" class="card-img-top" alt="...">
+            <div class="card-body">
+              <form action="/book/0060512806" method="POST">
+                <div class="view-book">
+                  <button type="submit" class="viewbtn">View Book </button>       
+                </div>
+            </form>
+            </div>
+          </div>
+        </div>
+        <div class="div-partitions">
+          <div class="card bg-dark">
+            <img src="https://cdn2.penguin.com.au/covers/original/9781784752224.jpg" class="card-img-top" alt="...">
+            <div class="card-body">
+              <form action="/book/030734813X" method="POST">
+                <div class="view-book">
+                  <button type="submit" class="viewbtn">View Book </button>       
+                </div>
+            </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+{% endblock %}
