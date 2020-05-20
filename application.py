@@ -28,6 +28,9 @@ db = scoped_session(sessionmaker(bind=engine))
 #       Index Route
 @app.route('/')
 def index():
+    if 'user_id' in session:
+        name = session["user_id"].capitalize()
+        return render_template("index.html", name = name)
     return render_template('index.html')
     
 #       Login Route
@@ -39,15 +42,13 @@ def login():
         #session['user'] = False
         name = request.form['username']
         password = request.form['password']
-        #data = db.execute("SELECT * FROM users WHERE username = :name and password =:password",
-        #{"name": name, "password": password})
-        data = db.execute('SELECT * FROM users WHERE username=:name and password=:password',
+        
+        data = db.execute("SELECT * FROM users WHERE username=:name and password=:password",
         {"name":name, "password":password}).fetchone()
-        print(data.username)
         if data is not None:
             session["user_id"] = name
             session["user"] = True
-            return render_template("index.html", name = name)
+            return redirect(url_for('index'))
         return render_template("login.html", error = "Username or Password not matched!")
     return render_template("signup.html")
 
@@ -76,18 +77,23 @@ def logout():
 #       Search For Book Route
 @app.route("/search", methods=['GET', 'POST'])
 def search():
+    if request.method == 'GET':
+        abort(403)
     if request.method == 'POST':
         search = request.form.get('getinput')
-        data = db.execute("SELECT * FROM books WHERE isbn= :isbn", # or title= :title or author= :author
-        {"isbn": search}).fetchall()#, "title": search, "author": search
-        if book is None:
+        
+        data = db.execute("SELECT * FROM books WHERE (isbn LIKE '%' || :isbn || '%') OR (title LIKE '%' || :title || '%') OR (author LIKE '%' || :author || '%')", 
+        {"isbn": search, "title": search, "author": search}).fetchall()
+        if data is None:
             abort(404)
-        return render_template("books.html", isbns = data.isbn, title = data.title, author = data.author, year = data.year)
+        session["val"] = True
+        return render_template("books.html", data = data) #isbns = data.isbn, title = data.title, author = data.author, year = data.year)
     return "HELLO"
 
 @app.route("/book/<id>", methods=['GET', 'POST'])
 def book(id):
     if request.method == 'POST':
+        session["val"] = False
         _book = db.execute("SELECT * FROM books WHERE isbn= :id",
         {"id": id}).first()
         return render_template("books.html", author = _book.author,  title = _book.title, isbns = _book.isbn, year = _book.year)

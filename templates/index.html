@@ -4,8 +4,8 @@
 {% endblock %}
 {% block nav %}
 {% if session["user"] %}
-<li class="nav-item active">
-  <a class="nav-link text-success">Welcome {{ name }} </a>
+<li class="">
+  <a class="nav-link text-name">{{ name }} </a>
 </li>
 <li class="nav-item">
   <a class="nav-link text-primary" href="{{ url_for('logout') }}">Logout</a>

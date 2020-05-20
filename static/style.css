@@ -25,7 +25,9 @@ html, body{
 .navbar-toggler{
     color: #fff;
 }
-
+.text-name{
+    color: #00FF7F;
+}
 /*    ======      Navbar ENDS       =======   */
 
 

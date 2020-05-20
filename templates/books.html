@@ -4,7 +4,7 @@
 {% endblock %}
 
 {% block nav %}
-{% if session['user'] %}
+{% if session["user"] %}
 <li class="nav-item active">
   <a class="nav-link text-success">Welcome! {{ name }}</a>
 </li>
@@ -27,22 +27,36 @@
       <section>
         <div class="container">
           <div class="main-div">
+            <table class="table">
+              <thead class="thead-light">
+                <tr>
+                  <th scope="col">Isbn</th>
+                  <th scope="col">Title</th>
+                  <th scope="col">Author</th>
+                  <th scope="col">Year</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% if session["val"] %}
+                {% for val in data %} 
+                <tr>
+                  <th scope="row">{{val.isbn}}</th>
+                  <td>{{val.title}}</td>
+                  <td>{{val.author}}</td>
+                  <td>{{val.year}}</td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                  <th scope="row">{{isbns}}</th>
+                  <td>{{title}}</td>
+                  <td>{{author}}</td>
+                  <td>{{year}}</td>
+                </tr>
+                {% endif %}
+              </tbody>
+            </table>
 
-            <ul>
-              <li>
-                {{ author }}
-                
-              </li>
-              <li>
-                {{ title }}
-              </li>
-              <li> 
-                {{ isbns }}
-              </li>
-              <li>
-                {{ year }}
-              </li>
-            </ul>
           </div>
         </div>
       </section>
