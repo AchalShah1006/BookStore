@@ -155,4 +155,18 @@ a{
 /*    ======      Login ENDS       =======   */
 
 
+/*    ======      Book View        =======   */
+.main-book{
+    margin: 20px;
+    width: 100%;
+    padding: 10px
+    ;color: rgb(92,163,234);
+    font-size: 20px;
+    opacity: 1;
+    filter: blur(0px) saturate(100%);
+}
+.reviews{
+    text-align: center;
+}
 
+/*    ======      Book Ends        =======   */

@@ -25,6 +25,8 @@ engine = create_engine(os.getenv("DATABASE_URL"))
 db = scoped_session(sessionmaker(bind=engine))
 #db.init_app(app)
 
+reviews = []
+
 #       Index Route
 @app.route('/')
 def index():
@@ -82,48 +84,65 @@ def search():
     if request.method == 'POST':
         search = request.form.get('getinput')
         
-        data = db.execute("SELECT * FROM books WHERE (isbn LIKE '%' || :isbn || '%') OR (title LIKE '%' || :title || '%') OR (author LIKE '%' || :author || '%')", 
+        data = db.execute("SELECT * FROM books WHERE (isbn LIKE '%' || :isbn || '%') OR (title LIKE '%' || :title || '%') OR (author LIKE '%' || :author || '%') ORDER BY year DESC", 
         {"isbn": search, "title": search, "author": search}).fetchall()
         if data is None:
             abort(404)
         session["val"] = True
+        session["book"] = False
+        #print(data)
+        #url = url_for('book', id = data.isbn)
         return render_template("books.html", data = data) #isbns = data.isbn, title = data.title, author = data.author, year = data.year)
     return "HELLO"
 
-@app.route("/book/<id>", methods=['GET', 'POST'])
+@app.route("/book/<id>")
 def book(id):
-    if request.method == 'POST':
-        session["val"] = False
-        _book = db.execute("SELECT * FROM books WHERE isbn= :id",
-        {"id": id}).first()
-        return render_template("books.html", author = _book.author,  title = _book.title, isbns = _book.isbn, year = _book.year)
-    return redirect(url_for('signup'))
-
-#       API Route
-@app.route("/api/<isbn>")
-def api(isbn):
-    getapi = db.execute("SELECT * FROM books WHERE isbn= :isbn",
-    {"isbn": isbn}).first()
-    if getapi is None:
-        return jsonify({
-            'error': 'No Books Found'
-        })
-    #   Api GoodReads
+    session["val"] = False
+    session["book"] = True
+    _book = db.execute("SELECT * FROM books WHERE isbn= :id",
+    {"id": id}).first()
+     #       GoodRead Api Data
     url = "https://www.goodreads.com/book/review_counts.json"
-    data = requests.get(url, params={ "key": "ekMV24VguYBUOSeqlhwdnw", "isbns": isbn})
-    data = data.json()
-    _count = data['books'][0]['reviews_count']
-    _avg_rating = data['books'][0]['average_rating']
-    return jsonify({ 
-        'books': {
-            'reviews_count': _count, 
-            'title': getapi.title,
-            'author': getapi.author,
-            'year': getapi.year,
-            'isbn': getapi.isbn, 
-            'average_rating': _avg_rating
-            }
-        })
+    api_data = requests.get(url, params={ "key": "ekMV24VguYBUOSeqlhwdnw", "isbns": id})
+    api_data = api_data.json()
+    _count = api_data['books'][0]['reviews_count']
+    _avg_rating = api_data['books'][0]['average_rating']
+    return render_template("books.html", author = _book.author,  title = _book.title, isbns = _book.isbn, year = _book.year, count = _count, avg_rates = _avg_rating, reviews = reviews)
+
+@app.route("/review", methods=['POST'])
+def review():
+    if request.method == 'POST':
+        session["review"] = []
+        session["review"] = request.form.get("txtarea")
+        reviews.append(session["review"])
+
+#       API Route 
+@app.route("/api/<isbn>", methods=['GET', 'POST'])
+def api(isbn):
+    if request.method == 'GET':
+        getapi = db.execute("SELECT * FROM books WHERE isbn= :isbn",
+        {"isbn": isbn}).first()
+        if getapi is None:
+            return jsonify({
+                'error': 'No Books Found'
+            })
+        #   Api GoodReads
+        url = "https://www.goodreads.com/book/review_counts.json"
+        data = requests.get(url, params={ "key": "ekMV24VguYBUOSeqlhwdnw", "isbns": isbn})
+        data = data.json()
+        _count = data['books'][0]['reviews_count']
+        _avg_rating = data['books'][0]['average_rating']
+        return jsonify({ 
+            'books': {
+                'reviews_count': _count, 
+                'title': getapi.title,
+                'author': getapi.author,
+                'year': getapi.year,
+                'isbn': getapi.isbn, 
+                'average_rating': _avg_rating
+                }
+            })
+
 
 
 if __name__ == "__main__":     
