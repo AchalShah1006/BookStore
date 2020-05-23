@@ -54,39 +54,39 @@
               <div class="container text-monospace border-primary" >
                   <div class="row">
                       <div class="col-md-12" style="text-align: center;">
-                          <h2 class="text-monospace text-capitalize text-success">Title : {{ title }} </h2>
+                          <h2 class="text-monospace text-capitalize text-success">Title : {{ book.title }} </h2>
                       </div>
                   </div>
                   <div class="row text-warning">
-                      <div class="col-md-4 text-center p-3">ISBN : {{ isbns }}</div>
-                      <div class="col-md-4 text-center p-3">Author : {{ author }} </div>
-                      <div class="col-md-4 text-center p-3">Year : {{ year }}</div>
-                      <div class="col-md-6 text-center p-3">Total Ratings : {{ count }} </div>
-                      <div class="col-md-6 text-center p-3">Average Ratings : {{ avg_rates }}</div>
-                      <div class="col-md-12 text-primary p-3" style="height: 300px;">
-                        <form action="url_for('review')">
-                          <div class="form-group m-1 p-1">
+                      <div class="col-md-4 text-center px-3 py-1">ISBN : {{ book.isbn }}</div>
+                      <div class="col-md-4 text-center px-3 py-1">Author : {{ book.author }} </div>
+                      <div class="col-md-4 text-center px-3 py-1">Year : {{ book.year }}</div>
+                      <div class="col-md-6 text-center px-3 py-1">Total Ratings : {{ api["books"][0]["reviews_count"] }} </div>
+                      <div class="col-md-6 text-center px-3 py-1">Average Ratings : {{ api["books"][0]["average_rating"] }}</div>
+                      <div class="col-md-12 text-primary px-3 py-1" >
+                        <form action="/review" method="POST">
+                          <div class="form-group p-1">
+                            <input type="hidden" name="post_id" value="{{book.isbn}}">
                             <label for="exampleFormControlSelect1">Review Book</label>
-                            <select class="form-control" id="exampleFormControlSelect1" name="optreview">
+                            <select class="form-control" id="exampleFormControlSelect1" name="rating">
                               <option>1</option>
                               <option>2</option>
                               <option>3</option>
                               <option>4</option>
                               <option>5</option>
                             </select>
-                            <label for="exampleFormControlTextarea1">Example textarea</label>
-                            <textarea class="form-control" id="exampleFormControlTextarea1" maxlength="300" placeholder="Type Book Reviews Here!" rows="3" name="txtarea"></textarea>
+                            <textarea class="form-control my-1" name="review" id="exampleFormControlTextarea1" maxlength="300" placeholder="Type Book Reviews Here!" rows="3"></textarea>
                           </div>
-                          <button class="m-1 ml-2 p-1" type="submit" value="Submit">Submit</button>
+                          <button class="mx-2 px-1" type="submit" value="Submit">Submit</button>
                         </form>
                       </div>
                       <hr width="100%">
-                      <div class="col-md-12 p-3" style="height: 120px;">
-                        <h5 class="p-0 m-0 reviews">Reviews</h5>
-                        <div class="p-0 m-1 overflow-auto">
-                          {% for review in reviews %}
-                          <span>{{ review }}</span>
-                          {% endfor %}
+                      <div class="col-md-12 p-3" style="height: 150px;">
+                        <h5 class="p-0 m-0 reviews">Your Reviews</h5>
+                        <div class="p-0 m-1 overflow-auto text-white">
+                          <span class="text-white">You Rated This Book {{ rating }} of 5</span>
+                          <br>
+                          <span class="text-white">{{ review }}</span>
                         </div>
                       </div>
                   </div>

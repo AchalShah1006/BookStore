@@ -24,8 +24,12 @@ Session(app)
 engine = create_engine(os.getenv("DATABASE_URL"))
 db = scoped_session(sessionmaker(bind=engine))
 #db.init_app(app)
-
-reviews = []
+       
+#   GoodRead API
+def gdApi(isbn):
+    #print(isbn)
+    data = requests.get("https://www.goodreads.com/book/review_counts.json", params={ "key": "ekMV24VguYBUOSeqlhwdnw", "isbns": isbn}).json()
+    return data
 
 #       Index Route
 @app.route('/')
@@ -97,49 +101,67 @@ def search():
 
 @app.route("/book/<id>")
 def book(id):
+    #print("ISBN:--------------------"+id )
     session["val"] = False
     session["book"] = True
-    _book = db.execute("SELECT * FROM books WHERE isbn= :id",
-    {"id": id}).first()
-     #       GoodRead Api Data
-    url = "https://www.goodreads.com/book/review_counts.json"
-    api_data = requests.get(url, params={ "key": "ekMV24VguYBUOSeqlhwdnw", "isbns": id})
-    api_data = api_data.json()
-    _count = api_data['books'][0]['reviews_count']
-    _avg_rating = api_data['books'][0]['average_rating']
-    return render_template("books.html", author = _book.author,  title = _book.title, isbns = _book.isbn, year = _book.year, count = _count, avg_rates = _avg_rating, reviews = reviews)
+    book = db.execute("SELECT * FROM books WHERE isbn= :id",
+    {"id": id}).first()   
+    if 'review' in session:
+        review = session["user_review"]
+        rating = session["user_rating"]
+    else:
+        review = ""
+        rating = ""
+    #    GoodRead Api Data
+    api = gdApi(id)
+    #print(api)
+    return render_template("books.html", book = book, api = api, review = review, rating = rating)
 
-@app.route("/review", methods=['POST'])
+@app.route("/review", methods=["POST"])
 def review():
     if request.method == 'POST':
-        session["review"] = []
-        session["review"] = request.form.get("txtarea")
-        reviews.append(session["review"])
+        isbn = request.form["post_id"]
+        comments = []
+        review = request.form["review"] 
+        rating = int(request.form["rating"])
+        session["review"] = True
+        book = db.execute("SELECT * FROM reviews WHERE username= :username AND book_id= :book_id",
+        {"username": session["user_id"], "book_id": isbn}).fetchone()
+        print(book)
+        if book == None:
+            db.execute("INSERT INTO reviews (username, rating, review, book_id) VALUES (:username, :rating, :review, :book_id)",
+            {"username": session["user_id"], "rating": rating, "review": review, "book_id": isbn})
+            db.commit()
+            session["user_review"] = review
+            session["user_rating"] = rating
+        else:
+            session["user_review"] = book.review
+            session["user_rating"] = book.rating
+    return redirect(url_for('book', id = isbn))
 
 #       API Route 
-@app.route("/api/<isbn>", methods=['GET', 'POST'])
+@app.route("/api/<int:isbn>", methods=['GET', 'POST'])
 def api(isbn):
     if request.method == 'GET':
-        getapi = db.execute("SELECT * FROM books WHERE isbn= :isbn",
+        dbapi = db.execute("SELECT * FROM books WHERE isbn= :isbn",
         {"isbn": isbn}).first()
-        if getapi is None:
+        if dbapi is None:
             return jsonify({
                 'error': 'No Books Found'
             })
+
         #   Api GoodReads
-        url = "https://www.goodreads.com/book/review_counts.json"
-        data = requests.get(url, params={ "key": "ekMV24VguYBUOSeqlhwdnw", "isbns": isbn})
-        data = data.json()
-        _count = data['books'][0]['reviews_count']
-        _avg_rating = data['books'][0]['average_rating']
+        api = gdApi(isbn)
+
+        #   Return JSON Data
         return jsonify({ 
-            'books': {
-                'reviews_count': _count, 
-                'title': getapi.title,
-                'author': getapi.author,
-                'year': getapi.year,
-                'isbn': getapi.isbn, 
-                'average_rating': _avg_rating
+            "books": {
+                "reviews_count": api["books"][0]["reviews_count"], 
+                "title": dbapi.title,
+                "author": dbapi.author,
+                "year": dbapi.year,
+                "isbn": dbapi.isbn, 
+                "average_rating": api["books"][0]["average_rating"]
                 }
             })
 

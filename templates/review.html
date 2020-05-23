@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% block title %}
+<title>Books Store :: {{ book.book_id }}</title>
+{% endblock %}
+
+{% block nav %}
+{% if session["user"] %}
+<li class="">
+  <a class="nav-link text-name">{{ name }} </a>
+</li>
+<li class="nav-item">
+  <a class="nav-link text-primary" href="{{ url_for('logout') }}">Logout</a>
+</li>
+
+{% else %}
+<li class="nav-item active">
+  <a class="nav-link text-primary" href="{{ url_for('login') }}">Login</a>
+</li>
+<li class="nav-item">
+  <a class="nav-link text-primary" href="{{ url_for('signup') }}">Sign Up</a>
+</li>
+{% endif %}
+{% endblock %}
+
+
+{% block main %}
+<div class="container">
+    <p>
+        Your review Has Been Submitted
+        <a href="/book/"+id>
+            Click Here 
+        </a>
+        To Return To {{ book.book_id }} Page!
+    </p>
+</div>
+{% endblock %}
