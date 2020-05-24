@@ -1,28 +1,44 @@
 import os
 
 from flask import *
-from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
-from flask_sqlalchemy import SQLAlchemy
 
-app = Flask(__name__)
 
 # Check for environment variable
 if not os.getenv("DATABASE_URL"):
     raise RuntimeError("DATABASE_URL is not set")
 
-# Configure session to use filesystem
-app.config["SESSION_PERMANENT"] = False
-app.config["SESSION_TYPE"] = "filesystem"
-Session(app)
+
 
 # Set up database
 engine = create_engine(os.getenv("DATABASE_URL"))
 db = scoped_session(sessionmaker(bind=engine))
 
 def main():
-    users = db.execute("SELECT * FROM dbachal")
-    print("{username} to {password}")
+    # Create User Table
+    engine.execute('CREATE TABLE users ('
+        'id SERIAL PRIMARY KEY,'
+        'username VARCHAR UNIQUE NOT NULL,'
+        'password VARCHAR NOT NULL);')  
+    print("User Table Created")
+
+    # Create Books Table
+    engine.execute('CREATE TABLE books ('
+        'isbn VARCHAR PRIMARY KEY,'
+        'title VARCHAR  NOT NULL,'
+        'author VARCHAR NOT NULL,'
+        'year VARCHAR  NOT NULL);')
+    print("Book Table Created")
+
+    # Create Review Table
+    engine.execute('CREATE TABLE reviews ('
+        'id SERIAL PRIMARY KEY,'
+        'username VARCHAR  NOT NULL,'
+        'rating VARCHAR  NOT NULL,'
+        'review VARCHAR  NOT NULL,'
+        'book_id VARCHAR NOT NULL);')
+    print("Reviews Table Created")
+
 if __name__ == "__main__":    
-    app.run()
+    main()

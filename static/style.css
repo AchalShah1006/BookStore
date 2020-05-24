@@ -25,8 +25,8 @@ html, body{
 .navbar-toggler{
     color: #fff;
 }
-.text-name{
-    color: #00FF7F;
+.text-success:hover {
+    color: blue;
 }
 /*    ======      Navbar ENDS       =======   */
 

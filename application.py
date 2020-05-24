@@ -1,6 +1,5 @@
 import os, requests
 from flask import *
-#from models import *
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -11,6 +10,11 @@ app = Flask(__name__)
 # Check for environment variable
 if not os.getenv("DATABASE_URL"):
     raise RuntimeError("DATABASE_URL is not set")
+
+# Set Api Key
+key = os.getenv("API_KEY")
+if not key:
+    raise RuntimeError("API_KEY is not set")
 
 # Configure session to use filesystem
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
@@ -23,15 +27,15 @@ Session(app)
 # Set up database
 engine = create_engine(os.getenv("DATABASE_URL"))
 db = scoped_session(sessionmaker(bind=engine))
-#db.init_app(app)
-       
-#   GoodRead API
+# db.init_app(app)
+     
+#GoodRead API
 def gdApi(isbn):
-    #print(isbn)
-    data = requests.get("https://www.goodreads.com/book/review_counts.json", params={ "key": "ekMV24VguYBUOSeqlhwdnw", "isbns": isbn}).json()
+    data = requests.get("https://www.goodreads.com/book/review_counts.json", params={ "key": key, "isbns": isbn})
+    data = data.json()
     return data
 
-#       Index Route
+# HomePage Route
 @app.route('/')
 def index():
     if 'user_id' in session:
@@ -39,16 +43,16 @@ def index():
         return render_template("index.html", name = name)
     return render_template('index.html')
     
-#       Login Route
+# Login Route
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
         return render_template('login.html')
     else:
-        #session['user'] = False
         name = request.form['username']
         password = request.form['password']
         
+        # Validation for existing User
         data = db.execute("SELECT * FROM users WHERE username=:name and password=:password",
         {"name":name, "password":password}).fetchone()
         if data is not None:
@@ -58,7 +62,7 @@ def login():
         return render_template("login.html", error = "Username or Password not matched!")
     return render_template("signup.html")
 
-#       Sign Up Route
+# Sign Up Route
 @app.route('/signup', methods=['GET','POST'])
 def signup():
     if request.method == 'GET':
@@ -66,6 +70,8 @@ def signup():
     else:
         name = request.form['username']
         passw = request.form['password']
+
+        # Submit New User Details into DB
         db.execute("INSERT INTO users (username, password) VALUES  (:name, :passw)",
         {"name": name, "passw": passw})
         db.commit()
@@ -73,73 +79,81 @@ def signup():
         return redirect(url_for('login'))
     return redirect(url_for('index'))
     
-#       Logout Route
+# Logout Route
 @app.route("/logout")
 def logout():
+    # Removing User From Session
     session.pop("user_id", None)  
     session["user"] = False
     return redirect(url_for('index'))
 
-#       Search For Book Route
+# Search For Book By ISBN, Title and Author Name.
 @app.route("/search", methods=['GET', 'POST'])
 def search():
     if request.method == 'GET':
         abort(403)
     if request.method == 'POST':
         search = request.form.get('getinput')
-        
         data = db.execute("SELECT * FROM books WHERE (isbn LIKE '%' || :isbn || '%') OR (title LIKE '%' || :title || '%') OR (author LIKE '%' || :author || '%') ORDER BY year DESC", 
         {"isbn": search, "title": search, "author": search}).fetchall()
+        
+        # If Book Does Not Exist In DB
         if data is None:
             abort(404)
+        # Creating Session For List Items of Books
         session["val"] = True
         session["book"] = False
-        #print(data)
-        #url = url_for('book', id = data.isbn)
-        return render_template("books.html", data = data) #isbns = data.isbn, title = data.title, author = data.author, year = data.year)
+        return render_template("books.html", data = data) 
     return "HELLO"
 
-@app.route("/book/<id>")
+# Book Data => Reviews Rating etc
+@app.route("/book/<id>", methods=["GET", "POST"])
 def book(id):
-    #print("ISBN:--------------------"+id )
-    session["val"] = False
-    session["book"] = True
-    book = db.execute("SELECT * FROM books WHERE isbn= :id",
-    {"id": id}).first()   
-    if 'review' in session:
-        review = session["user_review"]
-        rating = session["user_rating"]
-    else:
-        review = ""
-        rating = ""
-    #    GoodRead Api Data
-    api = gdApi(id)
-    #print(api)
-    return render_template("books.html", book = book, api = api, review = review, rating = rating)
+    comments= []
+    user = session["user_id"]
 
-@app.route("/review", methods=["POST"])
-def review():
+    # If User Submit The Review And Rating Then This Section Will Response
     if request.method == 'POST':
         isbn = request.form["post_id"]
-        comments = []
         review = request.form["review"] 
         rating = int(request.form["rating"])
-        session["review"] = True
         book = db.execute("SELECT * FROM reviews WHERE username= :username AND book_id= :book_id",
-        {"username": session["user_id"], "book_id": isbn}).fetchone()
-        print(book)
+        {"username": user, "book_id": isbn}).first()
         if book == None:
             db.execute("INSERT INTO reviews (username, rating, review, book_id) VALUES (:username, :rating, :review, :book_id)",
-            {"username": session["user_id"], "rating": rating, "review": review, "book_id": isbn})
+            {"username": user, "rating": rating, "review": review, "book_id": isbn})
             db.commit()
-            session["user_review"] = review
-            session["user_rating"] = rating
-        else:
-            session["user_review"] = book.review
-            session["user_rating"] = book.rating
-    return redirect(url_for('book', id = isbn))
+        return redirect(url_for('book', id = isbn))
+    # ===== END ======
 
-#       API Route 
+    if request.method == "GET":
+        if 'user' not in session:
+            return redirect(url_for('login'))
+
+        # Creating Session For Books
+        session["val"] = False
+        session["book"] = True
+        book = db.execute("SELECT * FROM books WHERE isbn= :id",
+        {"id": id}).first()   
+
+        # Search The Reviews And Rating Of The Book in DB
+        data = db.execute("SELECT * FROM reviews WHERE username= :username AND book_id= :id",
+        {"username": user,"id": id}).first()
+        if data is None:
+            session["review"] = False
+        else:
+            session["review"] = True
+            comments = data
+
+    # GoodRead Api Data
+        api = gdApi(id)
+
+    return render_template("books.html", book = book, api = api, comments = comments)
+
+
+    
+
+# API => Get JSON Data 
 @app.route("/api/<int:isbn>", methods=['GET', 'POST'])
 def api(isbn):
     if request.method == 'GET':
@@ -150,10 +164,10 @@ def api(isbn):
                 'error': 'No Books Found'
             })
 
-        #   Api GoodReads
+        # GoodRead Api Data
         api = gdApi(isbn)
 
-        #   Return JSON Data
+        # Return JSON Data
         return jsonify({ 
             "books": {
                 "reviews_count": api["books"][0]["reviews_count"], 
