@@ -1,11 +1,12 @@
 /*    ======      HTML BODY       =======   */
 html, body{
-    height: 100vh;
     margin: 0;
     padding: 0;
 }
 /*    ======      HTML ENDS       =======   */
-
+body{
+    background-color: black;
+}
 
 /*    ======      Navbar       =======   */
 .navbar{
@@ -48,16 +49,7 @@ html, body{
     width: 33.33%;
     padding: 5px;
 }
-@media only screen and (max-width: 768px){
-    .main-div{
-        display: block;
-        height: 100vh;
-    }
-    .div-partitions{
-        width: 100%;
-        padding: 5px;
-    }
-}
+
 .card{
     margin: 5px;
     padding: 5px;
@@ -93,10 +85,7 @@ html, body{
 /*    ======      Login        =======   */
 
 /*  Body    */
-.main{
-    background-color: #000000;
-    height: 100vh;
-}
+
 hr{
     border: 1px solid #00FF7F;
     color: #00FF7F;
@@ -157,10 +146,10 @@ a{
 
 /*    ======      Book View        =======   */
 .main-book{
-    margin: 20px;
+    margin: 0px;
     width: 100%;
-    padding: 10px
-    ;color: rgb(92,163,234);
+    padding: 10px;
+    color: rgb(92,163,234);
     font-size: 20px;
     opacity: 1;
     filter: blur(0px) saturate(100%);
@@ -168,5 +157,33 @@ a{
 .reviews{
     text-align: center;
 }
-
+.text-center{
+    padding: 1px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+.text-capitalize{
+    font-size: 26px;
+}
 /*    ======      Book Ends        =======   */
+
+
+/*   ===== Media Query      =====*/
+
+@media only screen and (max-width: 768px){
+    .main-div{
+        display: block;
+        height: 100vh;
+    }
+    .div-partitions{
+        width: 100%;
+        padding: 5px;
+    }
+    .main-book{
+        font-size: 16px;
+        padding: 2px;
+    }
+    .text-center{
+        padding: 1px;
+    }
+}

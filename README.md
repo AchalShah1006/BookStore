@@ -2,6 +2,11 @@
 
 Web Programming with Python and JavaScript <br><br>
 
+pip install Flask <br>
+pip install SQLAlchemy <br>
+pip install requests <br>
+pip install Flask-Session <br>
+
 
 Setting Application For Windows CMD Users: <br>
 1. Set Your Postgres Sql Database Url:  "set DATABASE_URL=Your URL" <br>
