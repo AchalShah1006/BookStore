@@ -187,3 +187,10 @@ a{
         padding: 1px;
     }
 }
+
+/* Error.html */
+.error{
+    margin-top: 64.4px;
+    padding: 10px;
+    color: white;
+}

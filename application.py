@@ -4,20 +4,15 @@ from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
+key = "ekMV24VguYBUOSeqlhwdnw"
+DATABASE_URL = "postgres://eifioctroozojj:20d3ca6dd8fd403f9adb9e58e46a6273ae2e7dd31066ce06b9c0b417f6ed4c31@ec2-34-195-169-25.compute-1.amazonaws.com:5432/da19bikahiqjh6"
 
 app = Flask(__name__)
 
-# Check for environment variable
-if not os.getenv("DATABASE_URL"):
-    raise RuntimeError("DATABASE_URL is not set")
 
-# Set Api Key
-key = os.getenv("API_KEY")
-if not key:
-    raise RuntimeError("API_KEY is not set")
 
 # Configure session to use filesystem
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
+app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SECRET_KEY"]=os.urandom(24)
 app.config["SESSION_PERMANENT"] = False
@@ -25,7 +20,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # Set up database
-engine = create_engine(os.getenv("DATABASE_URL"))
+engine = create_engine(DATABASE_URL)
 db = scoped_session(sessionmaker(bind=engine))
 # db.init_app(app)
      
@@ -71,11 +66,17 @@ def signup():
         name = request.form['username']
         passw = request.form['password']
 
+        existed = db.execute("SELECT username FROM users WHERE username=:name",
+        {"name":name}).fetchone()
+        
         # Submit New User Details into DB
-        db.execute("INSERT INTO users (username, password) VALUES  (:name, :passw)",
-        {"name": name, "passw": passw})
-        db.commit()
-        flash('New entry was successfully posted')
+        if existed is None: 
+            db.execute("INSERT INTO users (username, password) VALUES  (:name, :passw)",
+            {"name": name, "passw": passw})
+            db.commit()
+            flash('New entry was successfully posted')   
+        else:
+            return render_template("error.html", error = "UserName Already Exist. Try Diffrent Name") 
         return redirect(url_for('login'))
     return redirect(url_for('index'))
     
@@ -98,8 +99,8 @@ def search():
         {"isbn": search, "title": search, "author": search}).fetchall()
         
         # If Book Does Not Exist In DB
-        if data is None:
-            abort(404)
+        if not data:
+            return render_template("error.html", error="No Books Found")
         # Creating Session For List Items of Books
         session["val"] = True
         session["book"] = False

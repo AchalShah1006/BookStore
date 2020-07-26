@@ -27,7 +27,7 @@
 {% block search %}
   {% if session["user"] %}
     <form action="/search" method="POST" class="form-inline my-2 my-lg-0">
-      <input class="form-control mr-sm-2" id="getinput" name="getinput" type="search" placeholder="Search">
+      <input class="form-control mr-sm-2" id="getinput" name="getinput" type="search" placeholder="Search i.e Fire">
     <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
     </form>
   {% endif %}
@@ -44,11 +44,19 @@
           <div class="card bg-dark">
             <img src="https://images-na.ssl-images-amazon.com/images/I/815O5KyG6gL.jpg" class="card-img-top" alt="...">
             <div class="card-body">
+              {% if session["user"] %}
               <form action="/book/1451648537" method="GET">
                 <div class="view-book">
                   <button type="submit" class="viewbtn">View Book </button>       
                 </div>
             </form>
+            {% else %}
+            <form action="/login" method="GET">
+              <div class="view-book">
+                <button type="submit" class="viewbtn">View Book </button>       
+              </div>
+          </form>
+            {% endif %}
             </div>
           </div>
         </div>
@@ -56,11 +64,19 @@
           <div class="card bg-dark">
             <img src="https://www.lwcurrey.com/pictures/161575.jpg" class="card-img-top" alt="...">
             <div class="card-body">
+              {% if session["user"] %}
               <form action="/book/0060512806" method="GET">
                 <div class="view-book">
                   <button type="submit" class="viewbtn">View Book </button>       
                 </div>
             </form>
+            {% else %}
+            <form action="/login" method="GET">
+              <div class="view-book">
+                <button type="submit" class="viewbtn">View Book </button>       
+              </div>
+          </form>
+            {% endif %}
             </div>
           </div>
         </div>
@@ -68,11 +84,19 @@
           <div class="card bg-dark">
             <img src="https://cdn2.penguin.com.au/covers/original/9781784752224.jpg" class="card-img-top" alt="...">
             <div class="card-body">
+              {% if session["user"] %}
               <form action="/book/030734813X" method="GET">
                 <div class="view-book">
                   <button type="submit" class="viewbtn">View Book </button>       
                 </div>
             </form>
+            {% else %}
+            <form action="/login" method="GET">
+              <div class="view-book">
+                <button type="submit" class="viewbtn">View Book </button>       
+              </div>
+          </form>
+            {% endif %}
             </div>
           </div>
         </div>
