@@ -8,11 +8,9 @@ pip install requests <br>
 pip install Flask-Session <br>
 
 
-Setting Application For Windows CMD Users: <br>
-1. Set Your Postgres Sql Database Url:  "set DATABASE_URL=Your URL" <br>
-2. Set APi Key: "set API_KEY=Your Key" <br>
-3. set FLASK_APP=application.py <br> 
-4. set FLASK_DEBUG=1 <br><br>
+Flask App configuration:
+1. set FLASK_APP=application.py <br> 
+2. set FLASK_DEBUG=1 <br><br>
 
 Creating DATABASE:<br>
 Run CMD code: "python db.py" <br><br>
