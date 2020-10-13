@@ -6,6 +6,7 @@ Web Programming with Python and JavaScript <br><br>
 `pip install SQLAlchemy` <br>
 `pip install requests` <br>
 `pip install Flask-Session` <br>
+`pip install psycopg2`<br>
 
 
 Flask App configuration:
