@@ -1,0 +1,5 @@
+Flask
+SQLAlchemy
+requests
+Flask-Session
+psycopg2

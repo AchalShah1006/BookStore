@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 key = "ekMV24VguYBUOSeqlhwdnw"
-DATABASE_URL = "postgres://eifioctroozojj:20d3ca6dd8fd403f9adb9e58e46a6273ae2e7dd31066ce06b9c0b417f6ed4c31@ec2-34-195-169-25.compute-1.amazonaws.com:5432/da19bikahiqjh6"
+DATABASE_URL = "postgresql://eifioctroozojj:20d3ca6dd8fd403f9adb9e58e46a6273ae2e7dd31066ce06b9c0b417f6ed4c31@ec2-34-195-169-25.compute-1.amazonaws.com:5432/da19bikahiqjh6"
 
 app = Flask(__name__)
 
@@ -27,6 +27,7 @@ db = scoped_session(sessionmaker(bind=engine))
 #GoodRead API
 def gdApi(isbn):
     data = requests.get("https://www.goodreads.com/book/review_counts.json", params={ "key": key, "isbns": isbn})
+    print(data)
     data = data.json()
     return data
 
